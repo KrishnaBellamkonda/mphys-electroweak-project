@@ -1,0 +1,13 @@
+# virtual environment
+venv
+
+# data unrelated to the project
+dummy_data
+
+# local vscode config
+__pycache__
+.vscode
+.git
+
+# plots
+plots
