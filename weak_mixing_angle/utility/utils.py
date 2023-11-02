@@ -11,8 +11,6 @@ def read_muon_data(source:str, tree_name:str):
         tree = file[tree_name]
         branches = tree.arrays()
 
-        print(branches[0].tolist())
-
         # Extract mu positive data
         mup_PT  = branches["mup_PT"]
         mup_PHI  = branches["mup_PHI"]

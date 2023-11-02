@@ -2,7 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.mlab as mlab
 
-from weak_mixing_angle.utility.utils import read_muon_data, calc_invariant_mass
+from weak_mixing_angle.utility.utils import read_muon_data
+from weak_mixing_angle.processing.mass import calc_invariant_mass
 from weak_mixing_angle.utility.constants import Paths
 
 def main():
@@ -22,9 +23,6 @@ def main():
     max_bin_index = np.argmax(counts)
     max_bin_avg = (bins[max_bin_index]+bins[max_bin_index+1])/2
 
-    print(max_bin_avg, max_counts)
-    # max_bin = counts[np.argmax(counts)]
-    print(max)
     fig = plt.figure()
     ax = fig.add_subplot(111)
     ax.hist(invariant_mass, density=False, range=(0.4e5, 1.5e5), bins=n_bins, label="Invariant mass")
@@ -34,7 +32,7 @@ def main():
     ax.annotate(
         xy=(max_bin_avg, max_counts+500), 
         xytext=(max_bin_avg-50000, max_counts-20000),
-        text=f"Peak: {max_bin_avg:0.2f} counts: {max_counts}", 
+        text=f"Peak: {max_bin_avg:0.2f}\ncounts: {max_counts}", 
         arrowprops=dict(facecolor='black', linestyle="dashed"))
     
     plt.savefig(f"{Paths.plots_path}/invariant_mass_distribution.png")
