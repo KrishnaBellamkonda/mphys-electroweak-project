@@ -1,0 +1,25 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+from weak_mixing_angle.utility.constants import Paths
+
+def create_histogram(invariant_mass, n_bins=21):
+    counts, bins, = np.histogram(invariant_mass, bins=n_bins, range=(0.4e5, 1.5e5))
+    max_counts = np.max(counts)
+    max_bin_index = np.argmax(counts)
+    max_bin_avg = (bins[max_bin_index]+bins[max_bin_index+1])/2
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.hist(invariant_mass, density=False, range=(0.4e5, 1.5e5), bins=n_bins, label="Invariant mass")
+    ax.set_ylabel("Counts")
+    ax.set_xlabel("Mass")
+    ax.set_title("Distribution of the Invariant Mass in Muon Deacy")
+    ax.annotate(
+        xy=(max_bin_avg, max_counts+500), 
+        xytext=(max_bin_avg-50000, max_counts-20000),
+        text=f"Peak: {max_bin_avg:0.2f}\ncounts: {max_counts}", 
+        arrowprops=dict(facecolor='black', linestyle="dashed"))
+    
+    plt.savefig(f"{Paths.plots_path}/invariant_mass_distribution.png")
+    

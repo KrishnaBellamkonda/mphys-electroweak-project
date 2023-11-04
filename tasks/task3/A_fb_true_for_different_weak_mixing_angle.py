@@ -44,7 +44,6 @@ def main():
     A_fb_true_up_2 =  calc_fb_true(up_params_2)
     A_fb_true_up_3 =  calc_fb_true(up_params_3)
 
-
     down_params = FBTrueParameters(
         Q_l=(-1),
         T3_l=(-1/2),

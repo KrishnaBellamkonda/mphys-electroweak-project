@@ -5,21 +5,28 @@ import typing
 import matplotlib.pyplot as plt
 
 # Utility functions
-def read_muon_data(source:str, tree_name:str):
+def read_muon_data(source:str, tree_name:str, 
+                   mup_PT_name:str = "mup_PT",
+                   mup_PHI_name:str = "mup_PHI",
+                   mup_ETA_name:str = "mup_ETA",
+                   mum_PT_name:str = "mum_PT",
+                   mum_PHI_name:str = "mum_PHI",
+                   mum_ETA_name:str = "mum_ETA"
+                   ):
     
     with uproot.open(source) as file:
         tree = file[tree_name]
         branches = tree.arrays()
 
         # Extract mu positive data
-        mup_PT  = branches["mup_PT"]
-        mup_PHI  = branches["mup_PHI"]
-        mup_ETA  = branches["mup_ETA"]
+        mup_PT  = branches[mup_PT_name]
+        mup_PHI  = branches[mup_PHI_name]
+        mup_ETA  = branches[mup_ETA_name]
 
         # Extract mu minus data
-        mum_PT  = branches["mum_PT"]
-        mum_PHI  = branches["mum_PHI"]
-        mum_ETA  = branches["mum_ETA"]
+        mum_PT  = branches[mum_PT_name]
+        mum_PHI  = branches[mum_PHI_name]
+        mum_ETA  = branches[mum_ETA_name]
 
     return mup_PT, mup_PHI, mup_ETA, mum_PT, mum_PHI, mum_ETA
 

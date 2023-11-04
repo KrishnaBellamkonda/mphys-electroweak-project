@@ -3,6 +3,7 @@ venv
 
 # data unrelated to the project
 dummy_data
+data/
 
 # local vscode config
 __pycache__
