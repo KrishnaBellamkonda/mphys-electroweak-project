@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from weak_mixing_angle.utility.utils import read_muon_data
-from weak_mixing_angle.utility.constants import Paths
+from weak_mixing_angle.utility.constants import StoragePaths
 from weak_mixing_angle.processing.mass import calc_invariant_mass
 
 # Plot the invaraint mass for forward
@@ -11,7 +11,7 @@ def main():
     # Constants
     n_bins = 10
     
-    mup_PT, mup_PHI, mup_ETA, mum_PT, mum_PHI, mum_ETA= read_muon_data(Paths.muon_decay_data, "DecayTree;1")
+    mup_PT, mup_PHI, mup_ETA, mum_PT, mum_PHI, mum_ETA= read_muon_data(StoragePaths.muon_decay_data, "DecayTree;1")
     
     # Following the procedure here
     # https://iopscience.iop.org/article/10.1088/1742-6596/383/1/012005/pdf#:~:text=The%20forward%2Dbackward%20asymmetry%20Afb,search%20for%20new%20physics%20signatures.
@@ -52,7 +52,7 @@ def main():
     plt.title("Forward-Backward Asymmetry vs. Invariant Mass")
     plt.xlabel("Mass (?)")
     plt.ylabel("$A_{fb}$")
-    plt.savefig(f"{Paths.plots_path}/A_fb_invariant_mass_scatter_plot.png")
+    plt.savefig(f"{StoragePaths.plots_path}/A_fb_invariant_mass_scatter_plot.png")
     plt.show()
 
 

@@ -7,7 +7,7 @@ from pydantic import BaseModel
 import matplotlib.pyplot as plt
 
 from weak_mixing_angle.utility.constants import Paths
-
+from weak_mixing_angle.processing.mass import calc_invariant_mass 
 
 def calc_fb_asymmetry(mum_ETA: npt.NDArray,mup_ETA:npt.NDArray):
     F = np.sum(mum_ETA > mup_ETA)
@@ -76,16 +76,57 @@ def calc_fb_true(fb_true_parameters: FBTrueParameters):
     
     return  Afb_true
 
-class FBTrueParameters(BaseModel):
-    T3_q: float # 3rd component of iso-spin of a quark 
-    Q_q: float # Charge of the quark
-    T3_l: float # 3rd component of iso-spin of a lepton
-    Q_l:float # Charge of the lepton 
-    m_ll:np.ndarray = np.linspace(40, 150)
-    weak_mixing_angle:float = 0.231 # The standard value of weak-mixing angle
 
-    class Config:
-        arbitrary_types_allowed = True
+# General function to measure the Afb from 
+# real data with error bars
+
+def poisson_error(counts:int):
+    return 1/np.sqrt(counts)
+
+def measure_Afb_from_data(data, n_bins:int=21, fiducial_region=(0.4e5, 1.5e5)):
+    # Following the procedure here
+    # https://iopscience.iop.org/article/10.1088/1742-6596/383/1/012005/pdf#:~:text=The%20forward%2Dbackward%20asymmetry%20Afb,search%20for%20new%20physics%20signatures.
+
+    # 1) Calculate invariant mass
+    mup_PT, mup_PHI, mup_ETA, mum_PT, mum_PHI, mum_ETA = data
+    invariant_mass = calc_invariant_mass(mup_PT, mup_PHI, mup_ETA, mum_PT, mum_PHI, mum_ETA)
+
+    # 2) Divide the mass into bins
+    counts, bins = np.histogram(invariant_mass, bins=n_bins, range=fiducial_region)
+    # This accesses these bins and calculated F, B => A_fb
+    # and the average invariant mass of the bin
+    bin_avg_energy = []
+    bin_forward_events = []
+    bin_backward_events = []
+    bin_y_errors = [] # error in the no. of counts
+    bin_x_errors = [] # error in the mean invariant mass
+    for i in range(n_bins):
+        min_bin_val = bins[i]
+        max_bin_val= bins[i+1]
+
+        # Filtering for the events with the masses in the bin
+        bin_filter = (invariant_mass>=min_bin_val) & (invariant_mass<=max_bin_val)
+        bin_invariant_mass = invariant_mass[bin_filter]
+        bin_avg_energy.append(np.mean(bin_invariant_mass))
+        
+        # Using std to calculate the average error in energy
+        std_avg_energy = np.std(bin_invariant_mass)
+        bin_x_errors.append(std_avg_energy)
+
+        bin_mup_ETA, bin_mum_ETA = mup_ETA[bin_filter], mum_ETA[bin_filter]
+
+        # Finding the number of forward and backward events
+        n_forward = np.sum(bin_mum_ETA > bin_mup_ETA)
+        n_backward = np.sum(bin_mum_ETA < bin_mup_ETA)
+        bin_forward_events.append(n_forward)
+        bin_backward_events.append(n_backward)
+        bin_error = poisson_error(len(bin_invariant_mass))
+        bin_y_errors.append(bin_error)
+
+    # 3) Calculate Asymmetry
+    asymmetry_fb = [(F-B)/(F+B) for F, B in zip(bin_forward_events, bin_backward_events)]
+
+    return bin_avg_energy, asymmetry_fb, bin_x_errors, bin_y_errors
 
 
 # THis function accounts for the QCD correction
