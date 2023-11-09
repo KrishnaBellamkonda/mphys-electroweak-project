@@ -45,3 +45,13 @@ def plot_guassian(invariant_mass):
     x = np.linspace(0.5e5, 1.5e5, 100) 
     y = norm.pdf(x, mu, sigma) 
     plt.plot(x, y)
+
+def calc_chi_sqared_error(measured_values, theory_values, std_values):
+    # summation of (Observed_i - Expecteded_i)^2/std^2
+    return ((measured_values - theory_values)**2)/(std_values**2)
+    
+def quadratic(x, A, B, C):
+    return A*(x**2) + B*(x) + C
+
+
+
