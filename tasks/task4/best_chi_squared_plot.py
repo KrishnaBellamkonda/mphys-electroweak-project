@@ -40,36 +40,40 @@ def main():
 
     wma = np.linspace(0.20, 0.39, 30)
     m_ll = np.linspace(60, 120, n_bins) # Requried for the model which accepts in GeV
-    #i#nterpolation_values = [interpolate_linear(pp1_Afb,pp1_wma, pp2_Afb, pp2_wma, a) for a in wma] # Contains all of the interpolations for all the wmas
-    interpolation_values = [interpolate_linear(pp1_wma, pp1_Afb, pp2_wma, pp2_Afb, a) for a in wma]
-    # This below line is wrong
-    # the right number of paraemters
-    # should be n_mass_bins - 1
+    interpolation_values = [interpolate_linear(pp1_wma, pp1_Afb, pp2_wma, pp2_Afb,  a) for a in wma] # Contains all of the interpolations for all the wmas
     #std_values = np.ones(len(Afb)) * (1/np.sqrt(len(Afb))) # Poisson error
-    std_values = n_bins - 1
+    std_values = n_bins -1
     chi_squared_errors = [calc_chi_sqared_error(Afb, Afb_interpol, std_values) for Afb_interpol in interpolation_values ]
     
     print(chi_squared_errors)
     print(len(Afb), len(chi_squared_errors), len(interpolation_values), len(wma))
 
 
+    # Get the weak mixing angle for the minimum of the chisquared
+    min_chi_squared = min(chi_squared_errors)
+    min_chi_squared_index = np.argmin(chi_squared_errors)
+    wma_for_least_chi_squared = wma[min_chi_squared_index]
+    interpolation_vales_for_least_chi_squared = interpolation_values[min_chi_squared_index]
+    print(f"{min_chi_squared=} {wma_for_least_chi_squared=}")
 
     # Step 3) Plotting the wma vs ch_squared_errors plot
-    plt.scatter(x=wma, y=chi_squared_errors, label="chi-squared-values")
-    plt.ylabel("Chi Squared Error")
-    plt.xlabel("Weak Mixing Angle (rads)")
-    plt.savefig(f"{StoragePaths.plots_path}/chi_square_errors_for_wma.png")
+    plt.scatter(x=bin_avg_energy, y=interpolation_vales_for_least_chi_squared, label=f"Interpolation for least chi2={wma_for_least_chi_squared}")
+    plt.scatter(x=bin_avg_energy,y=Afb, label="Real Data")
+    plt.ylabel("Afb")
+    plt.xlabel("Invariant Mass (GeV)")
+    plt.legend()
+    plt.savefig(f"{StoragePaths.plots_path}/interpolation_values_for_least_chi2.png")
 
     # Step 4) Fit the data using a parabola
-    best_fit_params = fit_quadratic(wma, chi_squared_errors)
-    A, B, C = best_fit_params
-    best_fit_parabola = quadratic(wma, *best_fit_params)
-    plt.plot(wma, best_fit_parabola, color="r", label=f"Best-Fit A={A:.2f} B={B:.2f} C={C:.2f}")
-    plt.ylabel("Chi Squared Error")
-    plt.xlabel("Weak Mixing Angle (rads)")
-    plt.title("Best fit params using Chi Squared")
-    plt.legend()
-    plt.savefig(f"{StoragePaths.plots_path}/best_fit_parabola.png")
+    #best_fit_params = fit_quadratic(wma, chi_squared_errors)
+    #A, B, C = best_fit_params
+    #best_fit_parabola = quadratic(wma, *best_fit_params)
+   # plt.plot(wma, best_fit_parabola, color="r", label=f"Best-Fit A={A:.2f} B={B:.2f} C={C:.2f}")
+    #plt.ylabel("Chi Squared Error")
+    #plt.xlabel("Weak Mixing Angle (rads)")
+    #plt.title("Best fit params using Chi Squared")
+    #plt.legend()
+    #plt.savefig(f"{StoragePaths.plots_path}/best_fit_parabola.png")
 
 
 

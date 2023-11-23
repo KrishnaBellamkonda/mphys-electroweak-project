@@ -48,7 +48,7 @@ def plot_guassian(invariant_mass):
 
 def calc_chi_sqared_error(measured_values, theory_values, std_values):
     # summation of (Observed_i - Expecteded_i)^2/std^2
-    return ((measured_values - theory_values)**2)/(std_values**2)
+    return (((measured_values - theory_values)**2)/(std_values**2)).sum()
     
 def quadratic(x, A, B, C):
     return A*(x**2) + B*(x) + C

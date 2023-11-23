@@ -25,7 +25,7 @@ def calc_chi_squared_for_mixing_angle(data, wma, m_ll, std_values=None):
     # between the model and the theory
     chi_squared_error = calc_chi_sqared_error(data, Afb_pred, std_values)
 
-    return chi_squared_error.sum()
+    return chi_squared_error
 
 
 def fit_quadratic(x, y):
@@ -38,3 +38,9 @@ def fit_quadratic(x, y):
     res_1 = least_squares(residual, initial_params, args=(x, y))
     return res_1.x
 
+
+def interpolate_linear(x1, y1, x2, y2, x):
+    x1, x2, y1, y2 = np.array(x1), np.array(x2), np.array(y1), np.array(y2)
+    slope = (y2-y1)/(x2-x1)  # slope
+    multiplier = (x - x1)
+    return multiplier*slope + y1
