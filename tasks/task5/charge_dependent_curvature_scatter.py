@@ -5,16 +5,20 @@ import matplotlib.mlab as mlab
 from weak_mixing_angle.utility.utils import read_muon_data
 from weak_mixing_angle.processing.mass import calc_invariant_mass
 from weak_mixing_angle.utility.constants import StoragePaths
+from weak_mixing_angle.processing.mass import get_fiducial_range_data
+
 
 def main():
     # Step 1) Constants & Parameters
-    n_bins = 201
+    n_bins = 301
     data_file = StoragePaths.real_data
     tree_name = "Z/DecayTree"
 
 
     # Step 2) Read the real data
-    mup_PT, mup_PHI, mup_ETA, mum_PT, mum_PHI, mum_ETA = read_muon_data(data_file, tree_name)
+    data = read_muon_data(data_file, tree_name)
+    _, (mup_PT, mup_PHI, mup_ETA, mum_PT, mum_PHI, mum_ETA) = get_fiducial_range_data(data)
+
     invariant_mass = calc_invariant_mass(mup_PT, mup_PHI, mup_ETA, mum_PT, mum_PHI, mum_ETA)
     
     # Step 3) Create two psuedomass distributions
@@ -39,7 +43,7 @@ def main():
     ax = fig.add_subplot(111)
 #    ax.hist(pos_psuedomass, density=False, range=(0.7e5, 1.1e5), bins=n_bins, label="Pos Psuedomass", color="red")
 #    ax.set_ylabel("Counts")
-    ax.scatter(bin_centres, counts, label="Pos Psuedomass", color="red")
+    ax.scatter(bin_centres, counts, label="Pos Psuedomass", color="red", s=2)
     ax.set_xlabel("Mass")
     ax.set_title("Distribution of the Invariant Mass in Muon Deacy")
     #ax.annotate(
@@ -57,7 +61,7 @@ def main():
 
     #ax.hist(neg_psuedomass, density=False, range=(0.7e5, 1.1e5), bins=n_bins, label="Neg Psuedomass", color="blue")
     
-    ax.scatter(bin_centres, counts, label="Neg Psuedomass", color="blue")
+    ax.scatter(bin_centres, counts, label="Neg Psuedomass", color="blue", s=4, marker='^')
     ax.set_ylabel("Counts")
     ax.set_xlabel("Mass")
     ax.set_title("Distribution of the Invariant Mass in Muon Deacy")
@@ -68,7 +72,7 @@ def main():
     #    arrowprops=dict(facecolor='black', linestyle="dashed"))
 
     plt.legend()
-    plt.savefig(f"{StoragePaths.plots_path}/psuedo_mass_distribution_zoomed.png")
+    plt.savefig(f"{StoragePaths.plots_path}/psuedo_mass_distribution_fiducial_zoomed.png")
     
     plt.show()
 
