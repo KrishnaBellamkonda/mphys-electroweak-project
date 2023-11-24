@@ -1,10 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from weak_mixing_angle.utility.constants import StoragePaths
-from weak_mixing_angle.utility.utils import read_muon_data, quadratic
+from weak_mixing_angle.utility.utils import read_muon_data, quadratic, calc_chi_sqared_error
 from weak_mixing_angle.processing.mass import calc_invariant_mass, get_fiducial_range_data
 from weak_mixing_angle.processing.asymmetry import calc_fb_true, FBTrueParameters, measure_Afb_from_data
-from weak_mixing_angle.processing.fitting import calc_chi_squared_for_mixing_angle, fit_quadratic
+from weak_mixing_angle.processing.fitting import interpolate_linear, fit_quadratic
 
 def main():
     # Constants
@@ -18,12 +18,32 @@ def main():
     # calculate the A_fb with erros
     bin_avg_energy, Afb, err_invariant_mass, err_counts = measure_Afb_from_data(filtered_real_data, n_bins, (0.6e5, 1.2e5))
     
+
+    # Step 2) Get the template data
+    pp1_wma = 0.228
+    pp1_data = read_muon_data(StoragePaths.ppdata1, "MCDecayTree;1") # 0.228
+    pp1_fiducial_filter, (pp1_filtered_data) = get_fiducial_range_data(pp1_data, min_mass=60, max_mass=120, pt_min=2.5)
+    pp2_wma = 0.235
+    pp2_data = read_muon_data(StoragePaths.ppdata2, "MCDecayTree;1") # 0.235
+    pp2_fiducial_filter, (pp2_filtered_data) = get_fiducial_range_data(pp2_data, min_mass=60, max_mass=120, pt_min=2.5)
+
+    # calculating the Afb values for these datasets
+    pp1_bin_avg_energy, pp1_Afb, pp1_err_invariant_mass, pp1_err_counts = measure_Afb_from_data(pp1_filtered_data, 7, (60, 120))
+    pp2_bin_avg_energy, pp2_Afb, pp2_err_invariant_mass, pp2_err_counts = measure_Afb_from_data(pp2_filtered_data, 7, (60, 120))
+
+
     # Step 2)  Compute the chi-squared for different sin2theta
     wma = np.linspace(0.16, 0.27, 30)
     m_ll = np.linspace(60, 120, n_bins) # Requried for the model which accepts in GeV
+    template_interpolations = [interpolate_linear(pp1_wma, pp1_Afb, pp2_wma, pp2_Afb, a) for a in wma ]
+    print(template_interpolations[0])
+    print()
+    print(Afb)
     std_values = np.ones(len(Afb)) * (1/np.sqrt(len(Afb))) # Poisson error
-    chi_squared_errors = [calc_chi_squared_for_mixing_angle(Afb, a, m_ll,  std_values) for a in wma]
-   
+    #std_values = n_bins - 1
+    chi_squared_errors = [calc_chi_sqared_error(interpol , Afb,  std_values).sum() for a, interpol in zip(wma, template_interpolations)]
+    print(chi_squared_errors)
+
     # Step 3) Plotting the wma vs ch_squared_errors plot
     plt.scatter(x=wma, y=chi_squared_errors, label="chi-squared-values")
     plt.ylabel("Chi Squared Error")
