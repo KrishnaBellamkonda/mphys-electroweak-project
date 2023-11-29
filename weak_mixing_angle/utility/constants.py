@@ -23,4 +23,4 @@ class StoragePaths:
 
     # pp_data = "/tmp/ProjectData/13TeV_2016_28r2_Down_EW.root"
     # pp_sim_data = "/tmp/ProjectData/13TeV_2016_Down_Z_Sim09b_42112001.root"
-    plots_path = "weak_mixing_angle/plots"
+    plots_path = "/home/physics/phuhko/plots"
