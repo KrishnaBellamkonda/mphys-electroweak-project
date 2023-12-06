@@ -54,4 +54,7 @@ def quadratic(x, A, B, C):
     return A*(x**2) + B*(x) + C
 
 
-
+def get_parabola_parameters(a, b):
+    minima = -b/(2*a)
+    delta = -1/(2*b)
+    return minima, delta

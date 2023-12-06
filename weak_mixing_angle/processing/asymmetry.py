@@ -120,11 +120,15 @@ def measure_Afb_from_data(data, n_bins:int=21, fiducial_region=(0.4e5, 1.5e5)):
         n_backward = np.sum(bin_mum_ETA < bin_mup_ETA)
         bin_forward_events.append(n_forward)
         bin_backward_events.append(n_backward)
-        bin_error = poisson_error(len(bin_invariant_mass))
+        bin_error = poisson_error(len(bin_invariant_mass)) # 1/sqrt(N)
         bin_y_errors.append(bin_error)
 
     # 3) Calculate Asymmetry
     asymmetry_fb = [(F-B)/(F+B) for F, B in zip(bin_forward_events, bin_backward_events)]
+    
+    # 4) Make the std errors more accurate by using the 
+    # sigma = sqrt(1-Afb**2) * poisson_error
+    bin_y_errors = [(1 - asymmetry_fb[i]**2)*err  for i, err in enumerate(bin_y_errors)]
 
     return bin_avg_energy, asymmetry_fb, bin_x_errors, bin_y_errors
 
