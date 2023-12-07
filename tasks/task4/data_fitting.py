@@ -5,6 +5,7 @@ from weak_mixing_angle.utility.utils import read_muon_data, quadratic, calc_chi_
 from weak_mixing_angle.processing.mass import calc_invariant_mass, get_fiducial_range_data
 from weak_mixing_angle.processing.asymmetry import calc_fb_true, FBTrueParameters, measure_Afb_from_data
 from weak_mixing_angle.processing.fitting import interpolate_linear, fit_quadratic
+from weak_mixing_angle.utility.utils import get_parabola_parameters
 
 def main():
     # Constants
@@ -16,7 +17,7 @@ def main():
     
     real_fiducial_filter, (filtered_real_data) = get_fiducial_range_data(real_data) 
     # calculate the A_fb with erros
-    bin_avg_energy, Afb, err_invariant_mass, err_counts = measure_Afb_from_data(filtered_real_data, n_bins, (0.6e5, 1.2e5))
+    bin_avg_energy, Afb, err_invariant_mass, err_Afb = measure_Afb_from_data(filtered_real_data, n_bins, (0.6e5, 1.2e5))
     
 
     # Step 2) Get the template data
@@ -36,13 +37,17 @@ def main():
     wma = np.linspace(0.16, 0.27, 30)
     m_ll = np.linspace(60, 120, n_bins) # Requried for the model which accepts in GeV
     template_interpolations = [interpolate_linear(pp1_wma, pp1_Afb, pp2_wma, pp2_Afb, a) for a in wma ]
-    print(template_interpolations[0])
-    print()
-    print(Afb)
-    std_values = np.ones(len(Afb)) * (1/np.sqrt(len(Afb))) # Poisson error
+    #print(template_interpolations[0])
+    #print()
+    print(f"{template_interpolations[0]=}")
+    print(f"{Afb=}")
+    print(f"{err_Afb=}")
+    #std_values = np.ones(len(Afb)) * (1/np.sqrt(len(Afb))) # Poisson error
     #std_values = n_bins - 1
+    std_values = np.array(err_Afb)
     chi_squared_errors = [calc_chi_sqared_error(interpol , Afb,  std_values).sum() for a, interpol in zip(wma, template_interpolations)]
-    print(chi_squared_errors)
+    print(f"{chi_squared_errors[0]}=")
+    #print(chi_squared_errors)
 
     # Step 3) Plotting the wma vs ch_squared_errors plot
     plt.scatter(x=wma, y=chi_squared_errors, label="chi-squared-values")
@@ -54,7 +59,8 @@ def main():
     best_fit_params = fit_quadratic(wma, chi_squared_errors)
     A, B, C = best_fit_params
     best_fit_parabola = quadratic(wma, *best_fit_params)
-    plt.plot(wma, best_fit_parabola, color="r", label=f"Best-Fit A={A:.2f} B={B:.2f} C={C:.2f}")
+    minima, delta = get_parabola_parameters(A, B)
+    plt.plot(wma, best_fit_parabola, color="r", label=f"Best-Fit minima={minima:.5f}")
     plt.ylabel("Chi Squared Error")
     plt.xlabel("Weak Mixing Angle (rads)")
     plt.title("Best fit params using Chi Squared")
