@@ -4,8 +4,8 @@ from weak_mixing_angle.utility.constants import StoragePaths
 from weak_mixing_angle.utility.utils import read_muon_data, quadratic, calc_chi_sqared_error
 from weak_mixing_angle.processing.mass import calc_invariant_mass, get_fiducial_range_data
 from weak_mixing_angle.processing.asymmetry import calc_fb_true, FBTrueParameters, measure_Afb_from_data
-from weak_mixing_angle.processing.fitting import interpolate_linear, fit_quadratic, fit_parabola
-from weak_mixing_angle.utility.utils import get_parabola_parameters, parabola
+from weak_mixing_angle.processing.fitting import interpolate_linear, fit_quadratic
+from weak_mixing_angle.utility.utils import get_parabola_parameters
 
 def main():
     # Constants
@@ -34,10 +34,7 @@ def main():
 
 
     # Step 2)  Compute the chi-squared for different sin2theta
-    # Blinding our measurements
-    np.random.seed(42)
-    wma = np.random.uniform(0.16, 0.27, 30)
-    wma = sorted(wma)
+    wma = np.linspace(0.16, 0.27, 30)
     m_ll = np.linspace(60, 120, n_bins) # Requried for the model which accepts in GeV
     template_interpolations = [interpolate_linear(pp1_wma, pp1_Afb, pp2_wma, pp2_Afb, a) for a in wma ]
     #print(template_interpolations[0])
@@ -53,29 +50,33 @@ def main():
     #print(chi_squared_errors)
 
     # Step 3) Plotting the wma vs ch_squared_errors plot
-    plt.scatter(x=wma, y=chi_squared_errors, label="chi-squared-values")
-    plt.ylabel("Chi Squared Error")
-    plt.xlabel("Weak Mixing Angle (rads)")
-    plt.savefig(f"{StoragePaths.plots_path}/chi_square_errors_for_wma.png")
+    #plt.scatter(x=wma, y=chi_squared_errors, label="chi-squared-values")
+   
+
+    #plt.ylabel("Chi Squared Error")
+    #plt.xlabel("Weak Mixing Angle (rads)")
+    #plt.savefig(f"{StoragePaths.plots_path}/chi_square_errors_for_wma.png")
 
     # Step 4) Fit the data using a parabola
-    # best_fit_params = fit_quadratic(wma, chi_squared_errors)
-    # A, B, C = best_fit_params
-    # best_fit_parabola = quadratic(wma, *best_fit_params)
-    # minima, sigma = get_parabola_parameters(A, B)
-    best_fit_params = fit_parabola(wma, chi_squared_errors)
-    minima, sigma, k = best_fit_params
-    best_fit_parabola = parabola(wma, *best_fit_params)
+    best_fit_params = fit_quadratic(wma, chi_squared_errors)
+    A, B, C = best_fit_params
+    best_fit_parabola = quadratic(wma, *best_fit_params)
+    minima, delta = get_parabola_parameters(A, B)
     
-    print(f"{sigma=}")
 
-    plt.plot(wma, best_fit_parabola, color="r", label=f"Best-Fit minima={minima:.5f} sigma={sigma:.5f}")
-    plt.ylabel("Chi Squared")
-    sin2theta_w = r"\sin^{2}\left(\theta_w\right)"
-    plt.xlabel(f"{sin2theta_w}")
-    plt.title("Best fit params using Chi Squared")
+    # Plot the best fit plot alongside the real data
+    best_fit_interpolation = interpolate_linear(pp1_wma, pp1_Afb, pp2_wma, pp2_Afb, minima)
+
+
+
+    plt.scatter(m_ll, best_fit_interpolation, label=r"$A_{fb} for best-fit \sin^{2}\left(\theta_w\right)$")
+    plt.scatter(m_ll, Afb, label=r"A_{fb} measured in real data")
+    #plt.plot(wma, best_fit_parabola, color="r", label=f"Best-Fit minima={minima:.5f}")
+    plt.ylabel(r"A_{fb}")
+    plt.xlabel("Invariant mass (GeV)")
+    plt.title("Best fit vs Real Data")
     plt.legend()
-    plt.savefig(f"{StoragePaths.plots_path}/best_fit_parabola.png")
+    plt.savefig(f"{StoragePaths.plots_path}/real_data_vs_best_fit.png")
 
 
 

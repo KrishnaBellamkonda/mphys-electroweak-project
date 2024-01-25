@@ -54,10 +54,16 @@ def quadratic(x, A, B, C):
     return A*(x**2) + B*(x) + C
 
 
+def parabola(x, minima, sigma, k):
+    a = 1/(2*sigma**2)
+    return a*(x-minima)**2 + k
+
 def get_parabola_parameters(a, b):
     minima = -b/(2*a)
     delta = -1/(2*b)
     return minima, delta
+
+
 
 
 def map_to_bin(var, var_bins):

@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.optimize import least_squares
 from weak_mixing_angle.processing.asymmetry import calc_fb_true, FBTrueParameters
-from weak_mixing_angle.utility.utils import calc_chi_sqared_error, quadratic
+from weak_mixing_angle.utility.utils import calc_chi_sqared_error, quadratic, parabola
 
 def calc_chi_squared_for_mixing_angle(data, wma, m_ll, std_values=None):
     # Step 1) Making the theory predictions for
@@ -35,6 +35,16 @@ def fit_quadratic(x, y):
         return y - quadratic(x, a, b, c)
 
     initial_params = [1, 1, 0] # A, B, C
+    res_1 = least_squares(residual, initial_params, args=(x, y))
+    return res_1.x
+
+def fit_parabola(x, y):
+
+    def residual(params, x, y):
+        minima, sigma, k = params
+        return y - parabola(x, minima, sigma, k)
+
+    initial_params = [0.5, 1, 0]
     res_1 = least_squares(residual, initial_params, args=(x, y))
     return res_1.x
 
