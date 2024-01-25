@@ -1,13 +1,21 @@
 import numpy as np
-
+from weak_mixing_angle.processing.corrections import *
 # Calculating the invariant mass
+def calc_invariant_mass_with_CCB_correction(mup_PT, mup_PHI, mup_ETA, mum_PT, mum_PHI, mum_ETA,deltas):
+
+    correction=load_pseudomass(2016,1,1,mup_ETA,mup_PHI,mup_PT,deltas)*load_pseudomass(2016,-1,1,mum_ETA,mum_PHI,mum_PT,deltas)
+    momentum_factor = 2*mup_PT*mum_PT*correction
+    eta_factor = np.cosh(mup_ETA - mum_ETA) # This is the pseudorapidity factor  
+    phi_factor = np.cos(mup_PHI - mum_PHI)
+    mass_squared = momentum_factor * (eta_factor - phi_factor)
+    return np.array(np.sqrt(mass_squared))
+
 def calc_invariant_mass(mup_PT, mup_PHI, mup_ETA, mum_PT, mum_PHI, mum_ETA):
     momentum_factor = 2*mup_PT*mum_PT
     eta_factor = np.cosh(mup_ETA - mum_ETA) # This is the pseudorapidity factor  
     phi_factor = np.cos(mup_PHI - mum_PHI)
     mass_squared = momentum_factor * (eta_factor - phi_factor)
     return np.array(np.sqrt(mass_squared))
-
 
 
 def get_fiducial_range_data(data, min_mass=0.6e5, max_mass=1.2e5, pt_min=0.2e5, min_eta=2.0, max_eta=4.5):

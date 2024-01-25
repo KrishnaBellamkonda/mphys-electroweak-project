@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 import uproot
 from scipy.stats import norm
 import typing
@@ -64,8 +65,11 @@ def get_parabola_parameters(a, b):
     return minima, delta
 
 
+<<<<<<< Updated upstream
 
 
+=======
+>>>>>>> Stashed changes
 def map_to_bin(var, var_bins):
     # Returns the index of the matching bin
     for i in range(len(var_bins)-1):
@@ -80,3 +84,23 @@ def map_to_bin(var, var_bins):
     else:
         return None
 
+<<<<<<< Updated upstream
+=======
+# def compute_deltas(pseudomass_corrections_datasets):
+#     corrections_DATA, corrections_Z,corrections = pseudomass_corrections_datasets
+#     f_data = ROOT.TFile(corrections_DATA)
+#     t_data = f_data.Get(corrections)
+#     f_mc = ROOT.TFile(corrections_Z)
+#     t_mc = f_mc.Get(corrections)
+#     t_mc.AddFriend(t_data, "data")
+#     df_final = ROOT.RDataFrame(t_mc).Define("mc_uncertainty",
+#                                             "data.delta_uncertainty").Define(
+#                                                 "data_delta", "data.delta")
+#     df_final_np = df_final.AsNumpy()
+#     deltas = []
+#     deltas = [
+#         df_final_np["data_delta"][i] - df_final_np["delta"][i]
+#         for i in range(len(df_final_np))
+#     ]
+#     return deltas
+>>>>>>> Stashed changes

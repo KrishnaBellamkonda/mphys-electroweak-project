@@ -37,8 +37,8 @@ def main():
     print(f"{pp2_Afb=}")
 
         # interpolating the values for the given wma
-
-    wma = np.linspace(0.20, 0.39, 30)
+    wma = np.random.uniform(0.16,0.27,30)
+    
     m_ll = np.linspace(60, 120, n_bins) # Requried for the model which accepts in GeV
     #i#nterpolation_values = [interpolate_linear(pp1_Afb,pp1_wma, pp2_Afb, pp2_wma, a) for a in wma] # Contains all of the interpolations for all the wmas
     interpolation_values = [interpolate_linear(pp1_wma, pp1_Afb, pp2_wma, pp2_Afb, a) for a in wma]

@@ -59,6 +59,7 @@ def main():
     plt.savefig(f"{StoragePaths.plots_path}/chi_square_errors_for_wma.png")
 
     # Step 4) Fit the data using a parabola
+<<<<<<< Updated upstream
     # best_fit_params = fit_quadratic(wma, chi_squared_errors)
     # A, B, C = best_fit_params
     # best_fit_parabola = quadratic(wma, *best_fit_params)
@@ -73,6 +74,15 @@ def main():
     plt.ylabel("Chi Squared")
     sin2theta_w = r"\sin^{2}\left(\theta_w\right)"
     plt.xlabel(f"{sin2theta_w}")
+=======
+    best_fit_params = fit_quadratic(wma, chi_squared_errors)
+    A, B, C = best_fit_params
+    best_fit_parabola = quadratic(wma, *best_fit_params)
+    minima, delta = get_parabola_parameters(A, B)
+    plt.plot(wma, best_fit_parabola, color="r", label=f"Best-Fit minima={minima:.5f}")
+    plt.ylabel("Chi Squared")
+    plt.xlabel(r"$(\sin(\theta_w))^2$")
+>>>>>>> Stashed changes
     plt.title("Best fit params using Chi Squared")
     plt.legend()
     plt.savefig(f"{StoragePaths.plots_path}/best_fit_parabola.png")
