@@ -54,7 +54,29 @@ def quadratic(x, A, B, C):
     return A*(x**2) + B*(x) + C
 
 
+def parabola(x, minima, sigma, k):
+    a = 1/(2*sigma**2)
+    return a*(x-minima)**2 + k
+
 def get_parabola_parameters(a, b):
     minima = -b/(2*a)
     delta = -1/(2*b)
     return minima, delta
+
+
+
+
+def map_to_bin(var, var_bins):
+    # Returns the index of the matching bin
+    for i in range(len(var_bins)-1):
+        current_edge = var_bins[i]
+        next_edge = var_bins[i+1]
+        if (var >= current_edge) and (var < next_edge):
+            return i
+    # If in the last bin, the var is the same as last bin edge
+    # just count it in the last bin
+    if (var == next_edge):
+        return i 
+    else:
+        return None
+

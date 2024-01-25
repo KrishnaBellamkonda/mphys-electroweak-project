@@ -56,10 +56,10 @@ def main():
 
 
     # 4) Plot a relationship between the m_ll and A_fb_true
-
-    plt.plot(m_ll, A_fb_true_up_1, label=f"up-{wma_1}", linestyle="dashed", marker="o")
-    plt.plot(m_ll, A_fb_true_up_2, label=f"up-{wma_2}", linestyle="dashed", marker="v")
-    plt.plot(m_ll, A_fb_true_up_3, label=f"up-{wma_3}", linestyle="dashed", marker="s")
+    sin2theta_w_tex = r"$\sin^{2}\left(\theta_w\right)$"
+    plt.plot(m_ll, A_fb_true_up_1, label=f"{sin2theta_w_tex} = {wma_1}", linestyle="dashed", marker="o")
+    plt.plot(m_ll, A_fb_true_up_2, label=f"{sin2theta_w_tex} = {wma_2}", linestyle="dashed", marker="v")
+    plt.plot(m_ll, A_fb_true_up_3, label=f"{sin2theta_w_tex} = {wma_3}", linestyle="dashed", marker="s")
 
     # plt.plot(m_ll, A_fb_true_down, label="down quarks", linestyle="dotted")
 
