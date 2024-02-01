@@ -1,14 +1,25 @@
 import numpy as np
-from weak_mixing_angle.processing.corrections import *
-# Calculating the invariant mass
-def calc_invariant_mass_with_CCB_correction(mup_PT, mup_PHI, mup_ETA, mum_PT, mum_PHI, mum_ETA,deltas):
+from weak_mixing_angle.processing.corrections import load_pseudomass
 
-    correction=load_pseudomass(2016,1,1,mup_ETA,mup_PHI,mup_PT,deltas)*load_pseudomass(2016,-1,1,mum_ETA,mum_PHI,mum_PT,deltas)
-    momentum_factor = 2*mup_PT*mum_PT*correction
-    eta_factor = np.cosh(mup_ETA - mum_ETA) # This is the pseudorapidity factor  
-    phi_factor = np.cos(mup_PHI - mum_PHI)
-    mass_squared = momentum_factor * (eta_factor - phi_factor)
-    return np.array(np.sqrt(mass_squared))
+# Calculating the invariant mass
+# def calc_invariant_mass_with_CCB_correction(mup_PT, mup_PHI, mup_ETA, mum_PT, mum_PHI, mum_ETA,deltas):
+
+#     # Inputs to the load psuedomass function
+#     # correction=load_pseudomass(2016,1,1,mup_ETA,mup_PHI,mup_PT,deltas)*load_pseudomass(2016,-1,1,mum_ETA,mum_PHI,mum_PT,deltas)
+#     correction = load_pseudomass(2016,1,1,mup_ETA,mup_PHI,mup_PT,deltas)
+    
+#     momentum_factor = 2*mup_PT*mum_PT*correction
+#     eta_factor = np.cosh(mup_ETA - mum_ETA) # This is the pseudorapidity factor  
+#     phi_factor = np.cos(mup_PHI - mum_PHI)
+#     mass_squared = momentum_factor * (eta_factor - phi_factor)
+#     print(mass_squared)
+#     return np.array(np.sqrt(mass_squared))
+
+
+def calc_ccb_corrected_pt(polarity, charge, mu_PT, mu_PHI, mu_ETA, deltas, scale="MeV"):
+    # Correction
+    correction = load_pseudomass(2016,polarity, charge, mu_ETA, mu_PHI, mu_PT, deltas, scale)
+    return correction * mu_PT 
 
 def calc_invariant_mass(mup_PT, mup_PHI, mup_ETA, mum_PT, mum_PHI, mum_ETA):
     momentum_factor = 2*mup_PT*mum_PT
