@@ -84,6 +84,186 @@ def calc_fb_true(fb_true_parameters: FBTrueParameters):
 def poisson_error(counts:int):
     return 1/np.sqrt(counts)
 
+# Note: For this code, I assume the number of bins
+# of Afb required is equal to the number of bins
+# of efficiency provided
+def map_values_to_bin(value, mapping):
+    result = np.zeros_like(value)  # Create an array to store the result
+    for key in mapping:
+        mask = (value >= key[0]) & (value < key[1])  # Create a mask for values within the range
+        result[mask] = mapping[key]  # Assign the mapped value to the corresponding elements
+    # Round values beyond the bins to the closest bin
+    result[value < min(mapping.keys())[0]] = mapping[min(mapping.keys())]
+    result[value >= max(mapping.keys())[1]] = mapping[max(mapping.keys())]
+    return result
+
+def measure_Afb_from_trigger_corrected_data(data, mup_eff, mup_eff_bins, mum_eff, mum_eff_bins, n_bins:int=21, fiducial_region=(0.4e5, 1.5e5)):
+    
+    mup_eff = np.array(mup_eff)
+    mup_eff_bins = np.array(mup_eff_bins)
+    mum_eff = np.array(mum_eff)
+    mum_eff_bins = np.array(mum_eff_bins)
+
+    mup_PT, mup_PHI, mup_ETA, mum_PT, mum_PHI, mum_ETA = data
+    mup_ETA, mum_ETA = np.array(mup_ETA), np.array(mum_ETA)
+    invariant_mass = calc_invariant_mass(mup_PT, mup_PHI, mup_ETA, mum_PT, mum_PHI, mum_ETA)
+
+    # 2) Divide the mass into binss
+    counts, bins = np.histogram(invariant_mass, bins=n_bins, range=fiducial_region)
+    # This accesses these bins and calculated F, B => A_fb
+    # and the average invariant mass of the bin
+    bin_avg_energy = []
+    bin_forward_events = []
+    bin_backward_events = []
+    bin_y_errors = [] # error in the no. of counts
+    bin_x_errors = [] # error in the mean invariant mass
+
+    for i in range(n_bins):
+        min_bin_val = bins[i]
+        max_bin_val= bins[i+1]
+
+        # Filtering for the events with the masses in the bin
+        bin_filter = (invariant_mass>=min_bin_val) & (invariant_mass<=max_bin_val)
+        bin_invariant_mass = invariant_mass[bin_filter]
+        bin_avg_energy.append(np.mean(bin_invariant_mass))
+        
+        # Using std to calculate the average error in energy
+        std_avg_energy = np.std(bin_invariant_mass)
+        bin_x_errors.append(std_avg_energy)
+
+        bin_mup_ETA, bin_mum_ETA = mup_ETA[bin_filter], mum_ETA[bin_filter]
+
+        # Finding the number of forward and backward events
+        # Mask for forward bins
+        forward_mask = bin_mum_ETA > bin_mup_ETA
+        backward_mask = bin_mum_ETA < bin_mup_ETA
+
+        # Forward mask contains True for all the forward events
+        # Hence, I need an array that has all the values of
+        # binned efficiencies for the respective muon 
+        mup_eta_bin_to_efficiency_mapping = {
+           (mup_eff_bins[index], mup_eff_bins[index+1]): mup_eff[index]  for index in range(len(mup_eff))
+        }       
+
+        mum_eta_bin_to_efficiency_mapping = {
+           (mum_eff_bins[index], mum_eff_bins[index+1]): mum_eff[index]  for index in range(len(mum_eff))
+        }  
+
+        # Use the mappings to make to get values for forward 
+        # and backward event for each muon multiplied
+        # map_values_to_bin_vectorized = np.vectorize(map_values_to_bin)
+        # print(f"{mup_eta_bin_to_efficiency_mapping=}")
+        # print(f"{mum_eta_bin_to_efficiency_mapping=}")
+
+        mup_efficiencies = map_values_to_bin(bin_mup_ETA, mup_eta_bin_to_efficiency_mapping)
+        mum_efficiencies = map_values_to_bin(bin_mum_ETA, mum_eta_bin_to_efficiency_mapping)
+        
+        combined_efficiencies = mup_efficiencies * mum_efficiencies
+        n_forward = np.sum(1/combined_efficiencies[forward_mask])
+        n_backward = np.sum(1/combined_efficiencies[backward_mask])
+
+
+        # if i == 3:
+            # print(f"{mup_eff_bins=}")
+            # print(f"{mup_eff=}")
+            # # print(f"{mup_ETA=}")
+            # print(f"{mup_efficiencies=}")
+            # print(f"{mum_ETA=}")
+            # print(f"{mum_efficiencies=}")
+            # print(f"{combined_efficiencies=}")
+            # print(f"{n_forward=}")
+            # print(f"{n_backward=}")
+            # print(f"{mup_efficiencies[np.isnan(mup_efficiencies)]}")
+            # print(f"{mup_ETA[np.isnan(mup_efficiencies)]}")
+            # print(f"{np.argwhere(np.isnan(mup_efficiencies))}")
+            # print(f"{mum_efficiencies[np.isnan(mum_efficiencies)]}")
+            # print(f"{mum_ETA[np.isnan(mum_efficiencies)]}")
+            # print(f"{np.argwhere(np.isnan(mum_efficiencies))}")
+
+            # print(f"{mup_ETA[73998]=} {mup_efficiencies[73998]=}")
+            # print(f"{mum_ETA[58669]=} {mum_efficiencies[58669]=}")
+            # print(f"{map_values_to_bin([mup_ETA[73998]], mup_eta_bin_to_efficiency_mapping)=}")
+
+
+
+        
+        # Converting the forward cases into the required 
+
+        # n_forward = np.sum(bin_mum_ETA > bin_mup_ETA)
+        # n_backward = np.sum(bin_mum_ETA < bin_mup_ETA)
+        bin_forward_events.append(n_forward)
+        bin_backward_events.append(n_backward)
+
+        bin_error = poisson_error(len(bin_invariant_mass)) # 1/sqrt(N)
+        bin_y_errors.append(bin_error)
+
+    # # 3) Correcting for the trigger efficiencies
+    # for F, B in zip(bin_forward_events, bin_backward_events):
+
+    # 4) Calculate Asymmetry
+    asymmetry_fb = [(F-B)/(F+B) for F, B in zip(bin_forward_events, bin_backward_events)]
+
+
+
+    # 4) Make the std errors more accurate by using the 
+    # sigma = sqrt(1-Afb**2) * poisson_error
+    bin_y_errors = [(1 - asymmetry_fb[i]**2)*err  for i, err in enumerate(bin_y_errors)]
+
+    return bin_avg_energy, asymmetry_fb, bin_x_errors, bin_y_errors
+
+def measure_Afb_from_data_with_CCB_correction(data,charge_correction_data,n_bins:int=21, fiducial_region=(0.4e5, 1.5e5)):
+    # Following the procedure here
+    # https://iopscience.iop.org/article/10.1088/1742-6596/383/1/012005/pdf#:~:text=The%20forward%2Dbackward%20asymmetry%20Afb,search%20for%20new%20physics%20signatures.
+
+    #0) Calculate deltas
+
+    deltas=compute_deltas(charge_correction_data)
+
+    # 1) Calculate invariant mass
+    mup_PT, mup_PHI, mup_ETA, mum_PT, mum_PHI, mum_ETA = data
+    invariant_mass = calc_invariant_mass_with_CCB_correction(mup_PT, mup_PHI, mup_ETA, mum_PT, mum_PHI, mum_ETA,deltas,)
+
+    # 2) Divide the mass into bins
+    counts, bins = np.histogram(invariant_mass, bins=n_bins, range=fiducial_region)
+    # This accesses these bins and calculated F, B => A_fb
+    # and the average invariant mass of the bin
+    bin_avg_energy = []
+    bin_forward_events = []
+    bin_backward_events = []
+    bin_y_errors = [] # error in the no. of counts
+    bin_x_errors = [] # error in the mean invariant mass
+    for i in range(n_bins):
+        min_bin_val = bins[i]
+        max_bin_val= bins[i+1]
+
+        # Filtering for the events with the masses in the bin
+        bin_filter = (invariant_mass>=min_bin_val) & (invariant_mass<=max_bin_val)
+        bin_invariant_mass = invariant_mass[bin_filter]
+        bin_avg_energy.append(np.mean(bin_invariant_mass))
+        
+        # Using std to calculate the average error in energy
+        std_avg_energy = np.std(bin_invariant_mass)
+        bin_x_errors.append(std_avg_energy)
+
+        bin_mup_ETA, bin_mum_ETA = mup_ETA[bin_filter], mum_ETA[bin_filter]
+
+        # Finding the number of forward and backward events
+        n_forward = np.sum(bin_mum_ETA > bin_mup_ETA)
+        n_backward = np.sum(bin_mum_ETA < bin_mup_ETA)
+        bin_forward_events.append(n_forward)
+        bin_backward_events.append(n_backward)
+        bin_error = poisson_error(len(bin_invariant_mass)) # 1/sqrt(N)
+        bin_y_errors.append(bin_error)
+
+    # 3) Calculate Asymmetry
+    asymmetry_fb = [(F-B)/(F+B) for F, B in zip(bin_forward_events, bin_backward_events)]
+    
+    # 4) Make the std errors more accurate by using the 
+    # sigma = sqrt(1-Afb**2) * poisson_error
+    bin_y_errors = [(1 - asymmetry_fb[i]**2)*err  for i, err in enumerate(bin_y_errors)]
+
+    return bin_avg_energy, asymmetry_fb, bin_x_errors, bin_y_errors
+
 def measure_Afb_from_data(data, n_bins:int=21, fiducial_region=(0.4e5, 1.5e5)):
     # Following the procedure here
     # https://iopscience.iop.org/article/10.1088/1742-6596/383/1/012005/pdf#:~:text=The%20forward%2Dbackward%20asymmetry%20Afb,search%20for%20new%20physics%20signatures.

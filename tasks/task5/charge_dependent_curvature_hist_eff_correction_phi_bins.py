@@ -24,7 +24,6 @@ def main():
     
     # Step 2.25) Split data set into bins of phi
     phi_bins_edges = np.linspace(-np.pi, np.pi, n_bins, endpoint=True)
-    calc_trigger_eff_with_phi
 
     # Step 2.5) Weight the data with eta efficiencies
     

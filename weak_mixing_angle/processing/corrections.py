@@ -61,8 +61,8 @@ def load_pseudomass(year, polarity, charge, mu_eta, mu_phi, mu_pt, deltas, scale
 
     # deltas = np.array(deltas)
     # print(f"{deltas[indices]=}")
-    # return 1. / (1. + Qs * Ps * deltas[indices])
-    return 1. / (1. + Qs * Ps * np.abs(delta_corrections))
+    return 1. / (1. + Qs * Ps * deltas[indices])
+    # return 1. / (1. + Qs * Ps * np.abs(delta_corrections))
 
                            
 
@@ -100,9 +100,13 @@ def axis_index(edges, V, epsilon=1e-5):
 
 def indexing(year, polarity, eta, phi):
     # Calculating indices
-    eta_edges = np.array([2.0, 3.0, 4.5])
+    # eta_edges = np.array([2.0, 3.0, 4.5])
+    eta_edges = np.arange(2, 5, 0.2)
+
     n_eta = len(eta_edges) - 1
-    phi_edges = np.array([-np.pi, np.pi])
+    # phi_edges = np.array([-np.pi, np.pi])
+    phi_edges = np.arange(-2.94524336, 2.94524288, 0.393)
+
     n_phi = len(phi_edges) - 1
     polarities = (-1, 1)
     n_polarity = len(polarities)

@@ -23,7 +23,7 @@ def main():
 
     # Corrections for mup_PT
     mup_PT_corrected = calc_ccb_corrected_pt(1, 1, mup_PT, mup_PHI, mup_ETA, deltas, scale="MeV")
-    mum_PT_corrected = calc_ccb_corrected_pt(1, 1, mum_PT, mum_PHI, mum_ETA, deltas, scale="MeV")
+    mum_PT_corrected = calc_ccb_corrected_pt(1, -1, mum_PT, mum_PHI, mum_ETA, deltas, scale="MeV")
     invariant_mass_with_CCB_correction = calc_invariant_mass(mup_PT_corrected, mup_PHI, mup_ETA, mum_PT_corrected, mum_PHI, mum_ETA)
     print(f"{invariant_mass=}")
     print(f"{mup_PT=}")

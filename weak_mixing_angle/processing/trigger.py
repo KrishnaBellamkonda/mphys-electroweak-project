@@ -27,10 +27,6 @@ def calc_trigger_eff(eta_data,n_bins,primary_flag,pos_flags,neg_flags, bins=None
             N=neg_flags_count
             efficiency_error = np.sqrt((efficiency[i] - efficiency[i]**2)/N)
             efficiency_errors[i] = efficiency_error
-            
-        
-
-
 
     return efficiency,efficiency_errors, bins
 
@@ -130,6 +126,6 @@ def correct_events_for_trigger_efficiencies(data, var, var_bins, var_bin_eff ):
     for (i, v) in enumerate(var):
         # map this variable to the right bin
         bin_index =  map_to_bin(v, var_bins)
-        new_data[i] = data[i] * var_bin_eff[bin_index]
+        new_data[i] = data[i] * (1/var_bin_eff[bin_index])
     return new_data
     
