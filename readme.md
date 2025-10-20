@@ -3,8 +3,7 @@ Measurement of the Weak Mixing Angle using Drell–Yan Events in pp Collisions a
 ###📘 Overview
 
 This repository contains the full analysis framework developed for my Undergraduate Research Dissertation at the University of Warwick, conducted using open CERN LHCb datasets.
-The project investigates the Weinberg weak-mixing angle (sin² θ₍W₎) through analysis of Drell–Yan lepton-pair production, refining methodologies used in “Measurement of the weak mixing angle using the forward–backward asymmetry of Drell–Yan events in pp collisions at 8 TeV.”
-
+The project investigates the Weinberg weak-mixing angle (sin² θ₍W₎) through analysis of Drell–Yan lepton-pair production, introducing novel and improved methodologies. 
 ### 🎯 Objectives
 
 To implement a reproducible, modular analysis framework for electroweak parameter estimation.
